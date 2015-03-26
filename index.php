@@ -1,4 +1,7 @@
-<?php include_once("includes/functions.inc.php"); 
+<?php 
+session_start(); 
+include_once("includes/head.inc.php"); 
+include_once("includes/functions.inc.php"); 
 $imdb = new Imdb();
 ?>
 <!doctype html>
@@ -21,17 +24,25 @@ $imdb = new Imdb();
 
 <table width="1200" border="0" align="center" cellpadding="0" cellspacing="0" class="center">
   <tr>
-    <td class="main_tab_table"><a href="./" class="tab_link"><div class="main_tab_selected"><?= $lang_template_library; ?></div></a><a href="admin.php" class="uptab_link_deselected"><div class="main_tab"><?= $lang_template_admin; ?></div></a>
-	<div class="search_div">
+    <td class="main_tab_table"><a href="./" class="tab_link"><div class="main_tab_selected"><?= $lang_template_library; ?></div></a><a href="/~bhavdeepsethi/Tove/login.php" class="uptab_link_deselected"><div class="main_tab"><?= $lang_template_admin; ?></div></a>
+	<!--<div class="search_div">
 	
-	</div></td></tr>
+	</div>-->
+
+<div class="main_tab" style="float:right;">
+    <span class="uptab_link_deselected" style="cursor:default;">
+    Welcome, <?= $_SESSION["toveUser"]?>! &nbsp;
+    <a href="/~bhavdeepsethi/Tove/login.php">Log Out</a>
+    </span>
+  </div>
+  </td></tr>
 </table>
 
 <table width="1200" border="0" align="center" cellpadding="0" cellspacing="0" class="center">
   <tr>
     <td class="dropmenu_container"><a class="tab_link"><div style="float:left;padding:8px 50px 8px 50px;" id="chromemenu">
     <a style="cursor:pointer;" rel="dropmenu1" class="tab_link"><?= $lang_template_genres; ?></a>
-</div></a><a href="./" class="tab_link"><div style="float:left;padding:8px 20px 8px 20px;"><?= $lang_template_newVids; ?></div></a></td>
+</div></a><a href="/~bhavdeepsethi/Tove/init.php" class="tab_link"><div style="float:left;padding:8px 20px 8px 20px;">Browse</div></a></td>
   </tr>
 </table>
 
@@ -93,31 +104,7 @@ $imdb = new Imdb();
         slidesToScroll: 3                
       });
     });
-  </script>
-  <script type="text/javascript">
-    $(".watchList").click(function() {
-        var wlproduct = $('#product').text();
-        var wlquantity = $('#quantity').val();
-        //clicked = $(this);
-        //$(this).prop("disabled", true);
-        $(this).hide();
-
-        //console.log(clicked);
-        alert('Added to wishlist!');
-        return false;
-        /*
-        $.ajax({
-          type : "POST",
-            url : "{your path}/wl-script.php",
-            data : { wlproduct : wlproduct, wlquantity : wlquantity },
-            success : function(data) { 
-              $('div#result').text('You added '+wlquantity+' '+wlproduct+'\'s to your wishlist.');
-              $('#quantity').val("");
-            }
-        });
-        */ 
-    });
-  </script>
+  </script>  
 
 </body>
 </html>

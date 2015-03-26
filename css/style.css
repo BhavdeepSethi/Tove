@@ -314,3 +314,15 @@ body,td,th {
 .fade:hover {
       opacity: 0.5;
 }
+
+.login{	
+	border-style: solid;
+    border-width: 2px;
+}
+
+.inactive{
+	opacity: 0.5;
+	background-color: grey;
+	cursor:pointer;
+}
+

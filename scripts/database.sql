@@ -1,3 +1,36 @@
+CREATE TABLE `users` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`emailId` varchar(100) NOT NULL,
+`userKey` varchar(100) NOT NULL,
+`status` tinyint(1) DEFAULT 0,
+`createdTime` DATETIME DEFAULT CURRENT_TIMESTAMP,
+`updatedTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`id`),
+UNIQUE KEY(`emailId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='User data';
+
+
+CREATE TABLE `userWishlist` (
+`userId` int(11) NOT NULL AUTO_INCREMENT,
+`mId` varchar(100) NOT NULL,
+`status` tinyint(1) DEFAULT 1,
+`createdTime` DATETIME DEFAULT CURRENT_TIMESTAMP,
+`updatedTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`userId`,`mId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='User Wishlist data';
+
+
+CREATE TABLE `userRating` (
+`userId` int(11) NOT NULL AUTO_INCREMENT,
+`mId` varchar(100) NOT NULL,
+`rating` int(1) NOT NULL DEFAULT 0,
+`status` tinyint(1) DEFAULT 1,
+`createdTime` DATETIME DEFAULT CURRENT_TIMESTAMP,
+`updatedTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`userId`,`mId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='User Rating data';
+
+
 CREATE TABLE `movieList` (
   `mId` varchar(15) NOT NULL,
   `status` tinyint(1) DEFAULT 0,
@@ -6,6 +39,7 @@ CREATE TABLE `movieList` (
   PRIMARY KEY (`mId`),
   KEY(`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='movie process list';
+
 
 
 

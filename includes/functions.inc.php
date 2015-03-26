@@ -321,4 +321,164 @@ function formatRating($rating, $color=""){
 	}	
 	return '<span style="'.$color.'; border-style: solid; border-width: 2px;">'.$rating.'</span>';
 }
+
+function endsWith($haystack,$needle,$case=true) {
+    if($case){return (strcmp(substr($haystack, strlen($haystack) - strlen($needle)),$needle)===0);}
+    return (strcasecmp(substr($haystack, strlen($haystack) - strlen($needle)),$needle)===0);
+}
+
+
+
+function registerUser($user, $pwd){
+	
+	$PWD_SALT = "princetonColumbia";
+	if(in_array( $_SERVER['REMOTE_ADDR'], array( '127.0.0.1', '::1' ))){			
+		$db = new mysqli("127.0.0.1", "root", "", "recoProj");	
+	}else{
+		$db = new mysqli($_SERVER['RDS_HOSTNAME'], $_SERVER['RDS_USERNAME'], $_SERVER['RDS_PASSWORD'], "recoProj");
+	}
+		
+	if($db->connect_errno > 0){
+		die('Unable to connect to database [' . $db->connect_error . ']');
+	}
+	$userSQL = '"'.$db->real_escape_string($user).'"';
+	$pwdSQL = '"'.$db->real_escape_string(sha1($PWD_SALT.$pwd)).'"';
+	$result = $db->query("INSERT INTO users(emailId, userKey) values ($userSQL, $pwdSQL)");
+
+	if($result){
+		return $db->insert_id;
+	}else{		
+		//die('Error : ('. $db->errno .') '. $db->error);
+		if($db->errno==1062){
+			return -1;
+		}
+		return -2;
+	}
+}
+
+function checkLogin($user, $pwd){
+	
+	$PWD_SALT = "princetonColumbia";
+	if(in_array( $_SERVER['REMOTE_ADDR'], array( '127.0.0.1', '::1' ))){			
+		$db = new mysqli("127.0.0.1", "root", "", "recoProj");	
+	}else{
+		$db = new mysqli($_SERVER['RDS_HOSTNAME'], $_SERVER['RDS_USERNAME'], $_SERVER['RDS_PASSWORD'], "recoProj");
+	}
+
+		
+	if($db->connect_errno > 0){
+		die('Unable to connect to database [' . $db->connect_error . ']');
+	}
+	$userSQL = '"'.$db->real_escape_string($user).'"';
+	$pwdSQL = '"'.$db->real_escape_string(sha1($PWD_SALT.$pwd)).'"';
+	$query = "SELECT id, status from users where emailId=$userSQL and userKey=$pwdSQL";
+
+	if(!$result = $db->query($query)){		
+			return -1;				
+	}else if($result->num_rows != 1){
+		return -2;
+	}else{
+		if($row = $result->fetch_assoc()){
+			return $row;
+		}
+	}
+}
+
+
+function storeUserRating($user, $mId, $rating){
+		
+	if(in_array( $_SERVER['REMOTE_ADDR'], array( '127.0.0.1', '::1' ))){			
+		$db = new mysqli("127.0.0.1", "root", "", "recoProj");	
+	}else{
+		$db = new mysqli($_SERVER['RDS_HOSTNAME'], $_SERVER['RDS_USERNAME'], $_SERVER['RDS_PASSWORD'], "recoProj");
+	}
+		
+	if($db->connect_errno > 0){
+		die('Unable to connect to database [' . $db->connect_error . ']');
+	}
+	$userSQL = '"'.$db->real_escape_string($user).'"';
+	$mIdSQL = '"'.$db->real_escape_string($mId).'"';
+	$ratingSQL = '"'.$db->real_escape_string($rating).'"';
+	
+	$result = $db->query("INSERT INTO userRating(userId, mId, rating) values ($userSQL, $mIdSQL, $ratingSQL)");
+
+	if($result){
+		return 0;
+	}else{		
+		//die('Error : ('. $db->errno .') '. $db->error);
+		if($db->errno==1062){
+			return -1;
+		}
+		return -2;
+	}
+}
+
+function storeUserWatchList($user, $mId){
+		
+	if(in_array( $_SERVER['REMOTE_ADDR'], array( '127.0.0.1', '::1' ))){			
+		$db = new mysqli("127.0.0.1", "root", "", "recoProj");	
+	}else{
+		$db = new mysqli($_SERVER['RDS_HOSTNAME'], $_SERVER['RDS_USERNAME'], $_SERVER['RDS_PASSWORD'], "recoProj");
+	}
+		
+	if($db->connect_errno > 0){
+		die('Unable to connect to database [' . $db->connect_error . ']');
+	}
+	$userSQL = '"'.$db->real_escape_string($user).'"';
+	$mIdSQL = '"'.$db->real_escape_string($mId).'"';
+	
+	$result = $db->query("INSERT INTO userwatchList(userId, mId) values ($userSQL, $mIdSQL)");
+
+	if($result){
+		return 0;
+	}else{		
+		//die('Error : ('. $db->errno .') '. $db->error);
+		if($db->errno==1062){
+			return -1;
+		}
+		return -2;
+	}
+}
+
+
+
+function fetchUGCCount($user){
+	
+	$PWD_SALT = "princetonColumbia";
+	if(in_array( $_SERVER['REMOTE_ADDR'], array( '127.0.0.1', '::1' ))){			
+		$db = new mysqli("127.0.0.1", "root", "", "recoProj");	
+	}else{
+		$db = new mysqli($_SERVER['RDS_HOSTNAME'], $_SERVER['RDS_USERNAME'], $_SERVER['RDS_PASSWORD'], "recoProj");
+	}
+
+		
+	if($db->connect_errno > 0){
+		die('Unable to connect to database [' . $db->connect_error . ']');
+	}
+	$userSQL = '"'.$db->real_escape_string($user).'"';	
+	$ratingQuery = "SELECT count(*) as count from userRating where userId=$userSQL";
+	$ratingCount = 0;
+	$watchCount = 0;
+	if($result = $db->query($ratingQuery)){		
+		if($row = $result->fetch_assoc()){
+			$ratingCount = $row["count"];
+		}	
+	}
+
+	$watchQuery = "SELECT count(*) as count from userWatchList where userId=$userSQL";
+
+	if($result = $db->query($watchQuery)){		
+		if($row = $result->fetch_assoc()){
+			$watchCount = $row["count"];
+		}	
+	}
+	$totalCount = $ratingCount+$watchCount;
+	if($totalCount>2){
+		$_SESSION["toveInit"] = 1;
+		$result = $db->query("UPDATE users SET status=1 where id=$userSQL");				
+	}
+	return $totalCount;
+
+}
+
 ?>

@@ -27,12 +27,67 @@ class template {
 		<script type="text/javascript" src="js/jquery.qtip2.js"></script>
 		<script type="text/javascript">
 				$(document).ready(function(){
+						count = 0;
 						$(".basicRating").jRating({
 							step:true,
         					onClick : function(element, rate) {
-         						alert(rate);
+        						var mId = $(element).attr("data-id");
+        						//console.log(mId);
+         						//alert(rate);
+         						formData = {mId: mId, rating: rate, type:'rating'};
+         						$.ajax({
+	    							url : "/~bhavdeepsethi/Tove/dataPost.php",
+	    							type: "POST",
+	    							data : formData,
+	    							success: function(data, textStatus, jqXHR){
+	        						//data - response from server
+	        							count++;
+	        							//alert(data);	        							
+	        							if (count>2 && typeof showMainButtonInit != 'undefined' && $.isFunction(showMainButtonInit)) {	        									
+	        									showMainButtonInit();
+	        							}
+
+
+	    							},
+	    							error: function (jqXHR, textStatus, errorThrown){
+	 									alert("error!");
+	    							}
+								});	
         					}
       					});
+
+
+      					$(".watchList").click(function() {
+					        //clicked = $(this);
+					        //$(this).prop("disabled", true);
+					        var mId = $(this).attr("data-id");
+					        console.log(mId);
+					        $(this).hide();
+
+					        formData = {mId: mId, type:'watchList'};
+					        $.ajax({
+						        url : "/~bhavdeepsethi/Tove/dataPost.php",
+						        type: "POST",
+						        data : formData,
+						        success: function(data, textStatus, jqXHR){
+						          //data - response from server		
+						          var dataObj = jQuery.parseJSON(data);				            						            
+						            if(dataObj.response==-1){
+						            	alert("Already added to list!");
+						            	return false;
+						            }       
+						            count++;            
+						            if (count>2 && typeof showMainButtonInit != 'undefined' && $.isFunction(showMainButtonInit)) {                            
+						                showMainButtonInit();
+						            }
+
+
+						        },
+						        error: function (jqXHR, textStatus, errorThrown){
+						        alert("error!");
+						        }
+					    	}); 
+					    });
 
       					$(".basicFixedRating").jRating({
 							step:true,
@@ -52,13 +107,12 @@ class template {
     							show: {
              						solo: true,
              						delay: 400
-         						},
-         						/*
+         						},         						
     							hide: {
                 					fixed: true,
-                					delay: 500
-            					} ,*/
-            					hide : 'click',
+                					delay: 200
+            					} ,
+            					//hide : 'click',
             					style: {
      							   classes: 'qtip-bootstrap qtip-rounded qtip-shadow',
      							   tip: {
@@ -132,7 +186,7 @@ class template {
 			?>
 			<div style="float:left;padding:35px 0px 0px 0px;width:130px;height:200px; margin-left:30px;">
 			<div class="one hasTooltip">
-				<a href="info.php?mId=<?= $entry['mId'] ?>" class="hovercover fade">					
+				<a href="info.php?mId=<?= $entry['mId'] ?>" class="hovercover fade links">					
 					<img src="<?= $entry['poster'] ?>" border="0" width="130" height="200">
 				</a>
 				</div>
@@ -151,7 +205,7 @@ class template {
 							</div>
 						</div>
 						<div class="ratingBox">
-							<div style="color: Black; margin-top:5px; margin-right:10px; float:left" >Your Rating: </div><div class="basicRating" data-average="0" data-id="<?= $i; ?>"></div>
+							<div style="color: Black; margin-top:5px; margin-right:10px; float:left" >Your Rating: </div><div class="basicRating" data-average="0" data-id="<?= $entry["mId"] ?>"></div>
 						</div>
 						
 						<div class="ratingBox">
@@ -159,7 +213,7 @@ class template {
 						</div>
 
 						<div style="min-height:26px;">
-							<button class="watchList" >&#43; Add to WatchList </button>
+							<button class="watchList" data-id="<?= $entry["mId"] ?>">&#43; Add to WatchList </button>
 						</div>											
 						<div class="fp_plot"><?= $entry["plot"]; ?>
 						</div>
@@ -279,11 +333,11 @@ class template {
 			}
 		}
 
-		public function episodeLists() {
-			global $garbage,$settings_data;
+	public function episodeLists() {
+		global $garbage,$settings_data;
 
-			if (!file_exists($_GET['raw']))
-			return; //error
+		if (!file_exists($_GET['raw']))
+		return; //error
 		
 		$files = sortSeasonsList($_GET['raw']);
 		

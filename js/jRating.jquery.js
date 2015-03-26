@@ -213,7 +213,8 @@
 				}else{
 					finalNote = "Error!";
 				}
-				return finalNote;
+				return note;
+				//return finalNote;
 			};
 
 			function getStarWidth(){

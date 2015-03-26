@@ -16,7 +16,7 @@ class Imdb
 		$test = "local";
 		//mysqli_connect($_SERVER['RDS_HOSTNAME'], $_SERVER['RDS_USERNAME'], $_SERVER['RDS_PASSWORD'], $_SERVER['RDS_DB_NAME'], $_SERVER['RDS_PORT']);		
 		if(in_array( $_SERVER['REMOTE_ADDR'], array( '127.0.0.1', '::1' ))){			
-			$this->db = new mysqli("127.0.0.1", "root", "", "recoProj");	
+			$this->db = new mysqli("127.0.0.1", "root", "", "recoProj");				
 		}else{
 			$this->db = new mysqli($_SERVER['RDS_HOSTNAME'], $_SERVER['RDS_USERNAME'], $_SERVER['RDS_PASSWORD'], "recoProj");
 		}
@@ -27,6 +27,70 @@ class Imdb
 
 	}
 
+	
+
+	function listAllMovies($userId){
+		$filterList = array();		
+		$userSQL = '"'.$this->db->real_escape_string($userId).'"';
+		$ratedQuery = "select distinct mId from userRating where userId=$userSQL";		
+		if($result = $this->db->query($ratedQuery)){			
+			while($row = $result->fetch_assoc()){
+				array_push($filterList, $row["mId"]);
+			}
+		}
+		$watchListQuery = "select distinct mId from userWatchList where userId=$userSQL";		
+		if($result = $this->db->query($watchListQuery)){			
+			while($row = $result->fetch_assoc()){
+				array_push($filterList, $row["mId"]);
+			}
+		}
+		
+
+
+		$movieOuterList = array();
+		$movieQuery = "select m.*,mg.genre from movie m, movieGenre mg where m.mId=mg.mId group by m.mId order by mg.genre, m.year DESC, m.createdTime DESC";		
+		
+		$prevGenre = null;
+		$moviesList = array();
+		if(!$result = $this->db->query($movieQuery)){			
+			die('There was an error running the query [' . $db->error . ']');
+		}
+		while($row = $result->fetch_assoc()){
+			if(in_array($row["mId"], $filterList)){
+				continue;
+			}
+			$movie = array();			
+
+			$movie["mId"] = $row["mId"];
+			$mId = $movie["mId"];
+			$movie["title"] = $row["title"];				
+			$movie["year"] = $row["year"];
+			$movie["tagline"] = $row["tagline"];
+			$movie["plot"] = $row["plot"];			
+			$movie["runtime"] = $row["runtime"];
+			$movie["contentRating"] = $row["contentRating"];
+			$movie["rating"] = 30;			
+			$movie["genre"] = $row["genre"];
+
+			if (isset($row['image']) && $row['image'] != ""){
+				$movie["poster"] = $this->s3Url.$mId.".jpg";    			
+  			}else{
+    			$movie["poster"] = "images/unavailable.jpg";
+  			}
+
+  			if($prevGenre!= null && $movie["genre"] != $prevGenre){
+  				$movieOuterList[$prevGenre] = $moviesList;
+				$moviesList = array();
+			}
+
+			array_push($moviesList, $movie);
+			$prevGenre = $movie["genre"];
+		}
+		return $movieOuterList;
+
+	}
+
+
 	function listMovies($genre, $page){
 		$moviesList = array();		
 
@@ -36,7 +100,7 @@ class Imdb
 			$movieQuery = "select * from movie order by  year DESC, createdTime DESC";	
 		}
 		
-		if(!$result = $this->db->query($movieQuery)){
+		if(!$result = $this->db->query($movieQuery)){			
 			die('There was an error running the query [' . $db->error . ']');
 		}
 		while($row = $result->fetch_assoc()){
