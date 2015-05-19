@@ -7,6 +7,7 @@ import sys
 import urllib2
 import json
 import MySQLdb as mdb
+from imdb import IMDb
 
 URL = "http://lab.abhinayrathore.com/imdb/imdbWebService.php?o=json&m="
 HOST = "127.0.0.1"
@@ -15,16 +16,11 @@ PW = ""
 DB = "recoProj"
 
 
-
+ia = IMDb()
 def fetchData(mId):
-	global URL	
-	req = urllib2.Request(URL+mId)
-	req.add_header('Referer', 'http://lab.abhinayrathore.com')
-	try:
-		resp = urllib2.urlopen(req, timeout=30)	
-		content = resp.read()
-	#print content
-		return json.loads(content)
+	global ia
+	try: 
+		return ia.get_movie(mId[2:])
 	except:
 		return None
 	#return
@@ -217,11 +213,11 @@ if __name__ == "__main__":
 		if data == None:
 			continue
 		#print mId
-		if "TITLE" not in data:
+		if "title" not in data:
 			print "Skipping "+mId+" because of some error"
 			updateMovieList(mId, 2)
 			continue		
-		insertMovies(mId, data["TITLE"], data["YEAR"], data["TAGLINE"], data["PLOT"], data["POSTER"], data["RUNTIME"], data["MPAA_RATING"])
+		insertMovies(mId, data["title"], data["year"], data["TAGLINE"], data["plot"], data["POSTER"], data["RUNTIME"], data["MPAA_RATING"])
 		insertMovieGenre(mId, data["GENRES"])
 		insertMovieCast(mId, data["WRITERS"], data["DIRECTORS"], data["CAST"])
 		insertImdbReco(mId, data["RECOMMENDED_TITLES"])

@@ -14,6 +14,13 @@ body,td,th {
 	font-size: 12px;
 }
 
+body,td,th .info {
+	/*font-family: Verdana, Geneva, sans-serif;*/
+	font-family: "Source Sans Pro";
+	font-size: 14px;
+}
+
+
 .checklink {
 	font-weight:bold;
 	font-size:17px;
@@ -288,12 +295,13 @@ body,td,th {
 }
 
 
-.watchList{
+.watchList, .watchListRemove{
 	 background-image: url(../images/bg_jRatingInfos.png); /* 16px x 16px */
     background-color: transparent; /* make the button transparent */
     background-repeat: no-repeat;  /* make the background image appear only once */
-    background-position: 40px 0px;  /* equivalent to 'top left' */
-     background-size: 60%;
+    background-size: 100%;
+    /*background-position: 40px 0px;*/  /* equivalent to 'top left' */
+    /*background-size: 60%;*/
     border: none;           /* assuming we don't want any borders */
     cursor: pointer;        /* make the cursor like hovering over an <a> element */
     height: 26px;          /* make this the size of your image */
@@ -301,7 +309,14 @@ body,td,th {
     vertical-align: middle; /* align the text vertically centered */
     color:white;
     margin-top: 10px;
-    width: 100%;
+    width: 80%;
+    position: relative;
+    text-align: center;    
+    
+     display: table;
+     margin-left: auto;
+     margin-right: auto;
+
 }
 
 .fade {
@@ -326,3 +341,11 @@ body,td,th {
 	cursor:pointer;
 }
 
+.contact td{
+	margin-left:auto;
+	margin-right:auto;
+	background-color:#E1E1E1;
+	padding-bottom:20px;
+	padding-top:20px;
+	font-size: 16px;
+}

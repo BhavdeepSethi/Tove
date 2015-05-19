@@ -1,27 +1,67 @@
 CREATE TABLE `users` (
-`id` int(11) NOT NULL AUTO_INCREMENT,
-`emailId` varchar(100) NOT NULL,
-`userKey` varchar(100) NOT NULL,
+`userId` varchar(50) NOT NULL,
+`name` varchar(100),
+`emailId` varchar(100),
+`gender` varchar(6) DEFAULT NULL,
+`locale` varchar(10) DEFAULT NULL,
+`type` int(11) NOT NULL DEFAULT 0,
 `status` tinyint(1) DEFAULT 0,
 `createdTime` DATETIME DEFAULT CURRENT_TIMESTAMP,
 `updatedTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-PRIMARY KEY (`id`),
-UNIQUE KEY(`emailId`)
+PRIMARY KEY (`userId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='User data';
 
 
-CREATE TABLE `userWishlist` (
-`userId` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `userTracking` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`userId` varchar(50) NOT NULL,
+`mId` varchar(100) NOT NULL,
+`type` varchar(50) NOT NULL,
+`typeName` varchar(100) DEFAULT NULL,
+`source` varchar(100),
+`current` varchar(100),
+`createdTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='User Tracking data';
+
+
+CREATE TABLE `recoModels` (
+`recoName` varchar(50) NOT NULL,
+`displayName` varchar(100) NOT NULL,
+`recoType` varchar(50),
+`contentMeta` varchar(100),
+`status` int(11) NOT NULL DEFAULT 1,
+`desc` varchar(2000) NOT NULL,
+`createdTime` DATETIME DEFAULT CURRENT_TIMESTAMP,
+`updatedTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`recoName`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Reco Models';
+
+ALTER TABLE recoModels add column `displayName` varchar(100) NOT NULL after `recoName`;
+ALTER TABLE recoModels add column `contentMeta` varchar(100) after `recoType`;
+
+CREATE TABLE `userConnections` (
+`userId` varchar(50) NOT NULL,
+`friendId` varchar(50),
+`status` tinyint(1) DEFAULT 0,
+`createdTime` DATETIME DEFAULT CURRENT_TIMESTAMP,
+`updatedTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`userId`,`friendId`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='User connection data';
+
+
+CREATE TABLE `userWatchList` (
+`userId` varchar(20) NOT NULL,
 `mId` varchar(100) NOT NULL,
 `status` tinyint(1) DEFAULT 1,
 `createdTime` DATETIME DEFAULT CURRENT_TIMESTAMP,
 `updatedTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 PRIMARY KEY (`userId`,`mId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='User Wishlist data';
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='User WatchList data';
 
 
 CREATE TABLE `userRating` (
-`userId` int(11) NOT NULL AUTO_INCREMENT,
+`userId` varchar(20) NOT NULL,
 `mId` varchar(100) NOT NULL,
 `rating` int(1) NOT NULL DEFAULT 0,
 `status` tinyint(1) DEFAULT 1,
@@ -51,6 +91,8 @@ CREATE TABLE `movie` (
   `plot` varchar(2000),
   `image` varchar(500),
   `runtime` int(4),
+  `imdbRating` decimal(6,2),
+  `imdbVotes` int(11),
   `contentRating` varchar(3),
   `createdTime` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updatedTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -110,6 +152,43 @@ insert into movieCast(mid,castType,castName) values ('tt2267998', 'writer','gill
 insert into movieCast(mid,castType,castName) values ('tt2267998', 'director','david fincher');
 
 //select m.*, GROUP_CONCAT(mg.genre) from movie m LEFT JOIN movieGenre mg ON m.mId=mg.mId
+
+
+CREATE TABLE `genreScraping` (
+`id` int(11) NOT NULL AUTO_INCREMENT,
+`genre` varchar(100) NOT NULL,
+`current` int(11) DEFAULT 1,
+`end` int(11) DEFAULT 0,
+`createdTime` DATETIME DEFAULT CURRENT_TIMESTAMP,
+`updatedTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`id`),
+UNIQUE KEY(`genre`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Genre Scraping data';
+
+#genre = ["action","animation","comedy","horror","crime","drama","sci_fi","thriller","fantasy"]
+insert into genreScraping (genre, end)values ("action", 29125);
+insert into genreScraping (genre, end)values ("animation", 4210);
+insert into genreScraping (genre, end)values ("comedy", 66231);
+insert into genreScraping (genre, end)values ("horror", 17405);
+insert into genreScraping (genre, end)values ("crime", 20471);
+insert into genreScraping (genre, end)values ("drama", 123407);
+insert into genreScraping (genre, end)values ("sci_fi", 8263);
+insert into genreScraping (genre, end)values ("thriller", 26760);
+insert into genreScraping (genre, end)values ("fantasy", 8473);
+
+
+#select genre from genreScraping where id in (SELECT FLOOR((RAND() * 9)));
+select * from genreScraping order by rand() limit 1;
+
+CREATE TABLE `item2ItemReco` (
+`mId` varchar(100) NOT NULL,
+`mIdReco` varchar(100) NOT NULL,
+`type` varchar(100) NOT NULL,
+`createdTime` DATETIME DEFAULT CURRENT_TIMESTAMP,
+`updatedTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+PRIMARY KEY (`mId`,`mIdReco`),
+INDEX idx_type(`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='imdb reco data';
 
 
 //imdb recommended

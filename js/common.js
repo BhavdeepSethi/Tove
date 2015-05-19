@@ -50,7 +50,7 @@ function checkFiles(){
 }
 
 $(function() {
-	cssdropdown.startchrome("chromemenu");
+	//cssdropdown.startchrome("chromemenu");
 	$(".two").hide();
 	$(".one").hover(function() {
 		$('.two', this).fadeIn(200);
